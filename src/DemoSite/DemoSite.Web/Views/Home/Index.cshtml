@@ -1,0 +1,46 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Example Payment Form</title>
+</head>
+<body>
+<div class="container">
+    <p>Please Wait</p>
+    <input type="hidden" name="transactionId" value="@ViewData.Model.TransactionId" />
+</div>
+</body>
+<script>
+async function FetchThreeDSecureStatus() {
+    let form = document.getElementsByName("transactionId");
+    let transactionId = form[1].value;
+    console.info("Getting the status of transaction" + transactionId);
+    await fetch("umbraco/api/Opayo/3DSecureStatus/" + transactionId, {
+        method: "GET"
+    }).then(response => {
+        if (response.status == 200) {
+            let res = response.json();
+            return res;
+        }
+    }).then((response) => {
+        if (response == null) {
+            return;
+        }
+        if (response.errors) return Promise.reject(response);
+        else {
+            console.log(response);
+            if (response.completed && response.success) {
+                $("#threeDSecureModal").hide();
+                ShowSuccessMessage();
+                clearTimeout(timeOutForThreeDSecureFrame);
+            } else if(response.completed && !response.success){
+                ShowFailureMessage(response.details);
+            }
+            return response;
+        }
+    }).catch(e => console.log(e));
+}
+</script>
+</html>
