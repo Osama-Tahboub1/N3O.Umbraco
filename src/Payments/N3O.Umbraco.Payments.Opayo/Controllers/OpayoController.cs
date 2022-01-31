@@ -26,19 +26,32 @@ namespace N3O.Umbraco.Payments.Opayo.Controllers {
             return Ok(res);
         }
 
-        
         [HttpPost("{flowId:guid}/payment/process")]
-        public async Task<ActionResult<PaymentFlowRes<OpayoPayment>>> Process(OpayoPaymentReq req) {
+        public async Task<ActionResult<PaymentFlowRes<OpayoPayment>>> PaymentProcess(OpayoPaymentReq req) {
             var res = await _mediator.SendAsync<ProcessPaymentCommand, OpayoPaymentReq, PaymentFlowRes<OpayoPayment>>(req);
 
             return Ok(res);
         }
 
-        [HttpPost("{flowId:guid}/authorize")]
-        public async Task<ActionResult<ThreeDSecureStatus>> Authorize([FromForm]ThreeDSecureChallengeReq req) {
-            var res = await _mediator.SendAsync<ThreeDSecureChallengeCommand, ThreeDSecureChallengeReq, PaymentFlowRes<OpayoPayment>>(req);
+        [HttpPost("{flowId:guid}/payment/authorize")]
+        public async Task<ActionResult<ThreeDSecureStatus>> PaymentAuthorize([FromForm] ThreeDSecureChallengeReq req) {
+            var res = await _mediator.SendAsync<ThreeDSecurePaymmentChallengeCommand, ThreeDSecureChallengeReq, PaymentFlowRes<OpayoPayment>>(req);
 
             return Redirect(res.Result.CallbackUrl);
+        }
+
+        [HttpPost("{flowId:guid}/credential/create")]
+        public async Task<ActionResult<PaymentFlowRes<OpayoPayment>>> CredentialProcess(OpayoCredentialReq req) {
+            var res = await _mediator.SendAsync<CreateCredentialCommand, OpayoCredentialReq, PaymentFlowRes<OpayoCredential>>(req);
+
+            return Ok(res);
+        }
+
+        [HttpPost("{flowId:guid}/credential/authorize")]
+        public async Task<ActionResult<ThreeDSecureStatus>> CredentialAuthorize([FromForm] ThreeDSecureChallengeReq req) {
+            var res = await _mediator.SendAsync<ThreeDSecureCredentialChallengeCommand, ThreeDSecureChallengeReq, PaymentFlowRes<OpayoCredential>>(req);
+
+            return Redirect(res.Result.AdvancePayment.CallbackUrl);
         }
     }
 }

@@ -9,19 +9,20 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace N3O.Umbraco.Payments.Opayo.Handlers {
-    public class ThreeDSecureChallengeHandler :
-        PaymentsHandler<ThreeDSecurePaymmentChallengeCommand, ThreeDSecureChallengeReq, OpayoPayment> {
+    public class ThreeDSecureCredentialChallengeHandler :
+        PaymentsHandler<ThreeDSecureCredentialChallengeCommand, ThreeDSecureChallengeReq, OpayoCredential> {
         private readonly IOpayoClient _opayoClient;
 
-        public ThreeDSecureChallengeHandler(IPaymentsScope paymentsScope,
-                                            IOpayoClient opayoClient) : base(paymentsScope) {
+        public ThreeDSecureCredentialChallengeHandler(IPaymentsScope paymentsScope,
+                                                      IOpayoClient opayoClient) : base(paymentsScope) {
             _opayoClient = opayoClient;
         }
 
-        protected override async Task HandleAsync(ThreeDSecurePaymmentChallengeCommand req,
-                                                  OpayoPayment payment,
+        protected override async Task HandleAsync(ThreeDSecureCredentialChallengeCommand req,
+                                                  OpayoCredential credential,
                                                   IBillingInfoAccessor billingInfoAccessor,
                                                   CancellationToken cancellationToken) {
+            var payment = credential.AdvancePayment;
             var apiReq = new ApiThreeDSecureChallenge();
             apiReq.CRes = req.Model.CRes;
             apiReq.TransactionId = payment.TransactionId;
@@ -35,6 +36,8 @@ namespace N3O.Umbraco.Payments.Opayo.Handlers {
             }
 
             payment.ThreeDSecureProcessCompleted();
+
+            credential.UpdateAdvancePayment(payment);
         }
     }
 }

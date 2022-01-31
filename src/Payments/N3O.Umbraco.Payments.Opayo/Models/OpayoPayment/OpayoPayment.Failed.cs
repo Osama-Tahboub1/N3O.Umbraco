@@ -1,3 +1,5 @@
+using N3O.Umbraco.Payments.Lookups;
+
 namespace N3O.Umbraco.Payments.Opayo.Models {
     public partial class OpayoPayment {
         public void Failed(string transactionId, int? errorCode, string errorMessage) {
@@ -5,6 +7,7 @@ namespace N3O.Umbraco.Payments.Opayo.Models {
             OpayoErrorCode = errorCode;
             OpayoErrorMessage = errorMessage;
             IsFailed = true;
+            Status = PaymentObjectStatuses.Failed;
         }
     }
 }

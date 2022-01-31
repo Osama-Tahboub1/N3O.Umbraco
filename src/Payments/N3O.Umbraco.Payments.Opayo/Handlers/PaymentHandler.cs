@@ -40,7 +40,7 @@ namespace N3O.Umbraco.Payments.Opayo.Handlers {
 
         protected async Task ProcessPaymentAsync(OpayoPayment payment, OpayoPaymentReq req, BillingInfo billingInfo, bool saveCard) {
             var transactionInfo = _paymentsFlow.GetTransctionInfo();
-            var apiRequest = GetProcessPaymentRequest(transactionInfo, payment, req, billingInfo, saveCard);
+            var apiRequest = GetProcessPaymentRequest(transactionInfo, req, billingInfo, saveCard);
             
             try {
                 var transaction = await _opayoClient.TransactionAsync(apiRequest);
@@ -70,7 +70,6 @@ namespace N3O.Umbraco.Payments.Opayo.Handlers {
         }
 
         private ApiPaymentTransactionReq GetProcessPaymentRequest(TransactionInfo transactionInfo,
-                                                                  OpayoPayment payment,
                                                                   OpayoPaymentReq req,
                                                                   IBillingInfo billingInfo,
                                                                   bool saveCard) {
@@ -100,7 +99,14 @@ namespace N3O.Umbraco.Payments.Opayo.Handlers {
                apiCredentialTypeReq.CofUsage = "First";
                apiReq.CredentialType = apiCredentialTypeReq;
             }
-            var url = _actionLinkGenerator.GetUrl<OpayoController>(x => x.Authorize(null), new { flowId = _paymentsFlow.Id });
+
+            string url;
+            if (saveCard) {
+                url = _actionLinkGenerator.GetUrl<OpayoController>(x => x.CredentialAuthorize(null), new { flowId = _paymentsFlow.Id });
+            } else {
+                url = _actionLinkGenerator.GetUrl<OpayoController>(x => x.PaymentAuthorize(null), new { flowId = _paymentsFlow.Id });
+            }
+            
             apiReq.StrongCustomerAuthentication = new ApiStrongCustomerAuthentication();
             apiReq.StrongCustomerAuthentication.NotificationUrl =  url;
             apiReq.StrongCustomerAuthentication.BrowserIp = _remoteIpAddressAccessor.GetRemoteIpAddress().ToString();

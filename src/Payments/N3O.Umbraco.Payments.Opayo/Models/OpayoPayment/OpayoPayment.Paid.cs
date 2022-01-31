@@ -1,3 +1,5 @@
+using N3O.Umbraco.Payments.Lookups;
+
 namespace N3O.Umbraco.Payments.Opayo.Models {
     public partial class OpayoPayment {
         public void Paid(string transactionId, string bankAuthorisationCode, long retrievalReference) {
@@ -5,6 +7,9 @@ namespace N3O.Umbraco.Payments.Opayo.Models {
             BankAuthorisationCode = bankAuthorisationCode;
             OpayoRetrievalReference = retrievalReference;
             IsPaid = true;
+            
+            Status = PaymentObjectStatuses.Complete;
         }
+        
     }
 }

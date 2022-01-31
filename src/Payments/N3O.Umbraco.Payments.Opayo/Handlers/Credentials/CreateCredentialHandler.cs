@@ -27,7 +27,9 @@ namespace N3O.Umbraco.Payments.Opayo.Handlers {
                                                   CancellationToken cancellationToken) {
             var payment = _paymentsFlow.GetOrCreatePaymentObject<OpayoPayment>();
             var billingInfo = billingInfoAccessor.GetBillingInfo();
-            await ProcessPaymentAsync(payment, req.Model.AdvancePayment, billingInfo, false);
+            await ProcessPaymentAsync(payment, req.Model.AdvancePayment, billingInfo, true);
+
+            credential.UpdateAdvancePayment(payment);
         }
     }
 }
